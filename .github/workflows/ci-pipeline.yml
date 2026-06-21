@@ -32,7 +32,7 @@ jobs:
           exit 1
 
       - name: Install test dependencies
-        run: ppp install pytest requests
+        run: pip install pytest requests
 
       - name: Test wrong admin password is rejected
         run: pytest -q tests/test_login_failed.py
@@ -42,3 +42,4 @@ jobs:
       - name: Stop containers
         if: always()
         run: docker compose down -v
+

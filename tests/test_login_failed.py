@@ -52,3 +52,24 @@ def test_wrong_admin_password_is_rejected():
     assert response.status_code == 200
     assert "Login failed" in response.text
     assert "logout.php" not in response.text
+
+def test_demo_wrong_admin_password_should_login_successfully():
+    session = requests.Session()
+    reset_database(session)
+
+    login_page = session.get(f"{BASE_URL}/login.php", timeout=10)
+    login_page.raise_for_status()
+
+    response = session.post(
+        f"{BASE_URL}/login.php",
+        data={
+            "username": "admin",
+            "password": "wrong-password-for-ci",
+            "Login": "Login",
+            "user_token": get_user_token(login_page.text),
+        },
+        allow_redirects=True,
+        timeout=10,
+    )
+
+    assert "You have logged in as 'admin'" in response.text

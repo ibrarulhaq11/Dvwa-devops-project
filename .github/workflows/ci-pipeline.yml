@@ -1,0 +1,36 @@
+name: Docker CI
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  docker-smoke-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build containers
+        run: docker compose build
+
+      - name: Start containers
+        run: docker compose up -d
+
+      - name: Wait for DVWA
+        run: |
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4280/login.php > /dev/null; then
+              echo "DVWA is running"
+              exit 0
+            fi
+            sleep 5
+          done
+          docker compose logs
+          exit 1
+
+      - name: Stop containers
+        if: always()
+        run: docker compose down -v

@@ -17,7 +17,7 @@ jobs:
         run: docker compose build
 
       - name: Start containers
-        run: docker compose up -d
+        run: docker compose up -d --build
 
       - name: Wait for DVWA
         run: |
@@ -30,6 +30,14 @@ jobs:
           done
           docker compose logs
           exit 1
+
+      - name: Install test dependencies
+        run: pip install pytest requests
+
+      - name: Test wrong admin password is rejected
+        run: pytest -q tests/test_login_failed.py
+        env:
+          DVWA_BASE_URL: http://127.0.0.1:4280
 
       - name: Stop containers
         if: always()
